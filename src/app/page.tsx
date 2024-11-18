@@ -5,22 +5,22 @@ import { Flame, Search } from 'lucide-react'
 
 // Definir o tipo para os artigos
 interface Article {
-  source: { name: string }
   title: string
   description: string
   url: string
-  urlToImage: string
+  image: string
+  source: string
 }
 
-// Função para buscar notícias
+// Função para buscar notícias usando a CurrentsAPI
 const fetchNews = async (): Promise<Article[]> => {
   try {
-    const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY
+    const API_KEY = process.env.NEXT_PUBLIC_CURRENTS_API_KEY
     const response = await fetch(
-      `https://newsapi.org/v2/everything?q=tesla&from=2024-10-18&sortBy=publishedAt&apiKey=${API_KEY}`
+      `https://api.currentsapi.services/v1/search?&language=pt&apiKey=${API_KEY}`
     )
     const data = await response.json()
-    return data.articles || []
+    return data.news || []
   } catch (error) {
     console.error('Erro ao buscar notícias:', error)
     return []
@@ -30,9 +30,9 @@ const fetchNews = async (): Promise<Article[]> => {
 // Componente do cartão de notícias
 const NewsCard = ({ article }: { article: Article }) => (
   <div className="bg-white shadow-lg rounded-xl overflow-hidden transition-all hover:scale-105">
-    {article.urlToImage && (
+    {article.image && (
       <img
-        src={article.urlToImage}
+        src={article.image}
         alt={article.title}
         className="w-full h-48 object-cover"
       />
@@ -41,7 +41,7 @@ const NewsCard = ({ article }: { article: Article }) => (
       <h2 className="text-xl font-bold mb-2 line-clamp-2">{article.title}</h2>
       <p className="text-gray-600 line-clamp-3 mb-4">{article.description}</p>
       <div className="flex justify-between items-center">
-        <span className="text-sm text-gray-500">{article.source.name}</span>
+        <span className="text-sm text-gray-500">{article.source}</span>
         <a
           href={article.url}
           target="_blank"
