@@ -3,7 +3,20 @@
 import React, { useState, useEffect } from 'react'
 import { Flame, Search } from 'lucide-react'
 
-const fetchNews = async () => {
+// Definir a interface para os artigos
+interface Article {
+  title: string
+  description: string
+  url: string
+  urlToImage?: string // Campo opcional
+  source: {
+    name: string
+  }
+  publishedAt: string
+}
+
+// Função para buscar as notícias
+const fetchNews = async (): Promise<Article[]> => {
   try {
     const API_KEY = process.env.NEXT_PUBLIC_SERPAPI_KEY
     const response = await fetch(
@@ -16,7 +29,15 @@ const fetchNews = async () => {
     return []
   }
 }
-const NewsCard = ({ article, onCardClick }) => (
+
+// Componente do cartão de notícias
+const NewsCard = ({
+  article,
+  onCardClick
+}: {
+  article: Article
+  onCardClick: () => void
+}) => (
   <div
     onClick={onCardClick}
     className="bg-white shadow-lg rounded-xl overflow-hidden transition-all hover:scale-105 cursor-pointer"
@@ -46,7 +67,14 @@ const NewsCard = ({ article, onCardClick }) => (
   </div>
 )
 
-const NewsDetailModal = ({ article, onClose }) => {
+// Modal para exibir os detalhes de uma notícia
+const NewsDetailModal = ({
+  article,
+  onClose
+}: {
+  article: Article
+  onClose: () => void
+}) => {
   if (!article) return null
 
   return (
@@ -58,7 +86,6 @@ const NewsDetailModal = ({ article, onClose }) => {
         >
           X
         </button>
-
         {article.urlToImage && (
           <img
             src={article.urlToImage}
@@ -66,7 +93,6 @@ const NewsDetailModal = ({ article, onClose }) => {
             className="w-full h-96 object-cover rounded-t-xl"
           />
         )}
-
         <div className="p-6">
           <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
           <div className="flex justify-between mb-4">
@@ -75,9 +101,7 @@ const NewsDetailModal = ({ article, onClose }) => {
               {new Date(article.publishedAt).toLocaleDateString()}
             </span>
           </div>
-
           <p className="text-gray-700 mb-4 text-lg">{article.description}</p>
-
           <div className="mt-6 flex justify-between items-center">
             <a
               href={article.url}
@@ -94,9 +118,10 @@ const NewsDetailModal = ({ article, onClose }) => {
   )
 }
 
+// Componente principal
 export default function NewsBlog() {
-  const [news, setNews] = useState([])
-  const [selectedArticle, setSelectedArticle] = useState(null)
+  const [news, setNews] = useState<Article[]>([])
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -107,7 +132,7 @@ export default function NewsBlog() {
         const newsData = await fetchNews()
         setNews(newsData)
       } catch (error) {
-        console.error('Erro ao carregar notícias', error)
+        console.error('Erro ao carregar notícias:', error)
       } finally {
         setLoading(false)
       }
