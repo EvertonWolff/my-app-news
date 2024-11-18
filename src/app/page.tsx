@@ -3,12 +3,21 @@
 import React, { useState, useEffect } from 'react'
 import { Flame, Search } from 'lucide-react'
 
-const fetchNews = async () => {
+// Definir o tipo para os artigos
+interface Article {
+  source: { name: string }
+  title: string
+  description: string
+  url: string
+  urlToImage: string
+}
+
+// Função para buscar notícias
+const fetchNews = async (): Promise<Article[]> => {
   try {
     const API_KEY = process.env.NEXT_PUBLIC_NEWS_API_KEY
     const response = await fetch(
-      `
-https://newsapi.org/v2/everything?q=tesla&from=2024-10-18&sortBy=publishedAt&apiKey=${API_KEY}`
+      `https://newsapi.org/v2/everything?q=tesla&from=2024-10-18&sortBy=publishedAt&apiKey=${API_KEY}`
     )
     const data = await response.json()
     return data.articles || []
@@ -18,7 +27,8 @@ https://newsapi.org/v2/everything?q=tesla&from=2024-10-18&sortBy=publishedAt&api
   }
 }
 
-const NewsCard = ({ article }) => (
+// Componente do cartão de notícias
+const NewsCard = ({ article }: { article: Article }) => (
   <div className="bg-white shadow-lg rounded-xl overflow-hidden transition-all hover:scale-105">
     {article.urlToImage && (
       <img
@@ -45,8 +55,9 @@ const NewsCard = ({ article }) => (
   </div>
 )
 
+// Componente principal
 export default function NewsBlog() {
-  const [news, setNews] = useState([])
+  const [news, setNews] = useState<Article[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -57,7 +68,7 @@ export default function NewsBlog() {
         const newsData = await fetchNews()
         setNews(newsData)
       } catch (error) {
-        console.error('Erro ao carregar notícias', error)
+        console.error('Erro ao carregar notícias:', error)
       } finally {
         setLoading(false)
       }
